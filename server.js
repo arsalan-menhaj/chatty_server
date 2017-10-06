@@ -14,7 +14,11 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
+// Variable to store the number of active users
 let clientCounter = 0;
+
+// Variable to store the ID that will be attached to the next message
+let messageId = 0;
 
 // Checks where data sent by client is a message or notfication
 // and responds accordingly
@@ -29,6 +33,7 @@ function response(message) {
       case "postNotification":
         returnItem = {
           type: "incomingNotification",
+          id: messageId,
           username: parsed.username ? parsed.username:"Anonymous",
           content: parsed.content
         };
@@ -37,7 +42,7 @@ function response(message) {
       case "postMessage":
         returnItem = {
           type: "incomingMessage",
-          id: parsed.id,
+          id: messageId,
           username: parsed.username ? parsed.username:"Anonymous",
           userColor: parsed.userColor,
           // The line below removes the url text from the actual message content
@@ -48,6 +53,7 @@ function response(message) {
     }
     console.log(JSON.stringify(returnItem));
     client.send(JSON.stringify(returnItem));
+    messageId++;
   });
 }
 
